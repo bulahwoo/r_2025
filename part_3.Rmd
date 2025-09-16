@@ -1,0 +1,366 @@
+---
+title: R Basics Part 3
+date: "19 September 2025"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+    number_sections: true
+---
+
+---
+
+# Data manipulation with {dplyr}
+
+## Setting
+
+- Open a terminal window. Launch RStudio by running:
+
+  - *$ rstudio \-\-no-sandbox*
+
+---
+
+- In RStudio, click `File` -> `New File` -> `R Script`.
+
+- **Write your commands in the source panel (top-left), and then execute them.**
+
+---
+
+- Load the package {dplyr}
+
+```{r, message=FALSE}
+library(dplyr)
+```
+
+---
+
+- Import data
+
+```{r, echo=FALSE}
+catdata <- read.table("C:/Users/isla_/Documents/catdata.tsv", header = TRUE, sep = "\t")
+```
+
+```{r, eval=FALSE}
+setwd("/root/Documents/r_tutorial_part3")                                  # set working directory
+catdata <- read.table("rawdata/import02.txt", header = TRUE, sep = "\t")   # import the text file import02.txt
+```
+
+---
+
+- Check the first few lines of the data frame `catdata`.
+
+```{r}
+head(catdata)
+```
+
+---
+
+- Check the structure:
+
+```{r}
+str(catdata)
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## The native R pipe `|>`
+
+- Available since R version 4.1.0.
+
+- You may see the {magrittr} pipe `%>%` in many online tutorials.
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## select(): select columns
+
+- Specify the columns you need
+
+```{r}
+catdata |> select(breed, age, residence)
+```
+
+---
+
+- Specify the columns you don't need: add a minus sign (-) to the column names as a prefix
+
+```{r}
+catdata |> select(-breed, -age, -residence)
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## slice_min() and slice_max(): select rows
+
+- slice_min(): select rows with the smallest values of a variable (column).
+
+```{r}
+catdata |> slice_min(weight, n = 5)
+```
+
+---
+
+- slice_max(): select rows with the largest values of a variable (column).
+
+```{r}
+catdata |> slice_max(length, n = 5)
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## filter(): filter data by setting condition(s)
+
+- Show only `residence is "Czech"`
+
+```{r}
+catdata |> filter(residence == "Czech")
+```
+
+---
+
+- Show only `residence is "Czech" or "Italy"`
+
+```{r}
+catdata |> filter(residence %in% c("Czech", "Italy"))
+```
+
+---
+
+- Show only `weight > 10` and `age < 4`
+
+```{r}
+catdata |> filter(weight > 10, age < 4)
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## arrange(): sort data
+
+- Sort data by a specific column value in **ascending** order (from the smallest to the largest)
+
+```{r}
+catdata |> arrange(length)
+```
+
+---
+
+- Sort data by a specific column value in **descending** order (from the largest to the smallest)
+
+```{r}
+catdata |> arrange(desc(length))
+```
+
+---
+
+- Sort data by two specific column values
+
+```{r}
+catdata |> arrange(residence, desc(length))
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## mutate(): create new columns using existing columns
+
+- Create a new column `half_length`, which equals to `length / 2`.
+
+```{r}
+catdata |> mutate(half_length = length / 2)
+```
+
+---
+
+- Create a new column `ratio`, which equals to `length / weight`.
+
+```{r}
+catdata |> mutate(ratio = length / weight)
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## summarize(): summarize data
+
+- Calculate the sum of `length` using the function `sum()`
+
+```{r}
+catdata |> summarize(sum_length = sum(length))
+```
+
+---
+
+- Calculate the mean of `length` using the function `mean()`
+
+```{r}
+catdata |> summarize(mean_length = mean(length))
+```
+
+---
+
+- Count the size (number) of `food` using the function `n()`
+
+```{r}
+catdata |> summarize(number_food = n())
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## group_by(): grouping data by one or more variables (columns)
+
+- Group data frame `catdata` by `residence`, and calculate the sum of `length` using the function `sum()`
+
+```{r}
+catdata |> group_by(residence) |> summarize(sum_length = sum(length))
+```
+
+---
+
+- Group data frame `catdata` by `residence`, and calculate the mean of `length` using the function `mean()`
+
+```{r}
+catdata |> group_by(residence) |> summarize(mean_length = mean(length))
+```
+
+---
+
+- Group data frame `catdata` by `residence`, and count the size (number) of `food` using the function `n()`
+
+```{r}
+catdata |> group_by(residence) |> summarize(number_food = n())
+```
+
+![](part1_raw/gap.png)
+&nbsp;
+
+## Exercise
+
+- Consider the data frame `catdata`:
+
+  - 1. How many cats live in Czech?
+  
+  - 2. How many cats prefer wet food and weigh more than 5 kg?
+  
+  - 3. What is the health condition of the oldest cat in Norway?
+  
+  - 4. Where does the cat of the longest body live?
+  
+  - 5. Which country owns the largest number of Bengal?
+  
+  - 6. Which country owns the largest number of cats whose health condition is either "Okay", "Great", or "Excellent"?
+  
+  - 7. The unit for `age` variable is year. Add a new column 'age_month', which holds the value = age * 12.
+  
+  - 8. Show the data of the oldest cat in each country.
+  
+  - 9. What is the average body length of cats who are older than 20 months and prefer dry food in each country?
+  
+![](part1_raw/gap02.png)
+&nbsp;
+
+## Solutions
+
+- 1. How many cats live in Czech?
+
+```{r}
+catdata |>
+  filter(residence == "Czech") |>
+  summarize(number = n())
+```
+
+---
+
+- 2. How many cats prefer wet food and weigh more than 5 kg?
+
+```{r}
+catdata |>
+  filter(food == "Wet") |>
+  filter(weight > 5) |>
+  summarize(number = n())
+```
+
+---
+
+- 3. What is the health condition of the oldest cat in Norway?
+
+```{r}
+catdata |>
+  filter(residence == "Norway") |>
+  slice_max(age, n = 1) |>
+  select(health)
+```
+
+---
+
+- 4. Where does the cat of the longest body live?
+
+```{r}
+catdata |>
+  slice_max(length, n = 1) |>
+  select(residence)
+```  
+
+---
+
+- 5. Which country owns the largest number of Bengal?
+
+```{r}
+catdata |>
+  filter(breed == "Bengal") |>
+  group_by(residence) |>
+  summarize(number = n()) |>
+  slice_max(number)
+```
+
+---
+
+- 6. Which country owns the largest number of cats whose health condition is either "Okay", "Great", or "Excellent"?
+
+```{r}
+catdata |>
+  filter(health %in% c("Okay", "Great", "Excellent")) |>
+  group_by(residence) |>
+  summarize(number = n()) |>
+  slice_max(number)
+```
+
+---
+
+- 7. The unit for `age` variable is year. Add a new column 'age_month', which holds the value = age * 12.
+
+```{r}
+catdata |>
+  mutate(age_month = age * 12)
+```
+
+---
+
+- 8. Show the data of the oldest cat in each country.
+
+```{r}
+catdata |>
+  group_by(residence) |>
+  slice_max(age, n = 1)
+```
+
+---
+
+- 9. What is the average body length of cats who are older than 20 months and prefer dry food in each country?
+
+```{r}
+catdata |>
+  mutate(age_month = age * 12) |>
+  filter(age_month > 20, food == "Dry") |>
+  group_by(residence) |>
+  summarize(avg_length = mean(length))
+```
+
+![](part1_raw/gap.png)
+&nbsp;

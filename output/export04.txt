@@ -1,0 +1,5 @@
+,Fruit,Initial,Stock
+sample1,1,S,TRUE
+sample2,7,A,FALSE
+sample3,3,U,TRUE
+sample4,4,T,TRUE

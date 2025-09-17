@@ -1,5 +1,0 @@
-,Flag,Animal,Oil
-country1,square,pig,TRUE
-country2,triangle,cow,FALSE
-country3,circle,butterfly,TRUE
-country4,rectangle,snake,FALSE

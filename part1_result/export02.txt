@@ -1,4 +1,0 @@
-"" "c.1..7..3." "c..S....A....U.." "c.TRUE..FALSE..TRUE."
-"1" 1 "S" TRUE
-"2" 7 "A" FALSE
-"3" 3 "U" TRUE
